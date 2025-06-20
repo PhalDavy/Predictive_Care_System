@@ -29,20 +29,6 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
     
-    # Background Section
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                padding: 60px 0; margin: 40px -50px; border-radius: 20px;">
-        <div style="text-align: center; color: white; padding: 0 50px;">
-            <h2 style="font-size: 2.5em; margin-bottom: 20px; font-weight: 300;">Revolutionizing Agriculture</h2>
-            <p style="font-size: 1.3em; line-height: 1.8; max-width: 800px; margin: 0 auto;">
-                Harness the power of artificial intelligence and advanced analytics to optimize your crop yield, 
-                reduce resource waste, and make informed decisions that drive sustainable farming practices.
-            </p>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-    
     # Key Features Section
     st.markdown("## 🚀 Key Features")
     
@@ -95,9 +81,9 @@ def show_home_page():
     # Getting Started Section
     st.markdown("## 🎯 Getting Started")
     
-    col1, col2 = st.columns([2, 1])
+    col1, col2 , col3= st.columns([1, 8, 1])
     
-    with col1:
+    with col2:
         st.markdown("""
         <div style="background: #F8F9FA; padding: 25px; border-radius: 10px; border: 1px solid #E9ECEF;">
             <h4 style="color: #2E8B57; margin-bottom: 20px;">How to Use This System</h4>
@@ -121,8 +107,142 @@ def show_home_page():
         </div>
         """, unsafe_allow_html=True)
         
-        # IMPORTANT: This button navigates to dashboard
-        if st.button("🚀 Go to Dashboard", type="primary", use_container_width=True):
+        # Enhanced animated button with CSS
+        st.markdown("""
+        <style>
+        .animated-button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff9ff3, #54a0ff);
+            background-size: 400% 400%;
+            border: none;
+            border-radius: 50px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            animation: gradientShift 3s ease infinite;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            margin: 10px 0;
+        }
+        
+        .animated-button:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            animation-duration: 1s;
+        }
+        
+        .animated-button:active {
+            transform: translateY(-1px) scale(1.02);
+        }
+        
+        .animated-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s;
+        }
+        
+        .animated-button:hover::before {
+            left: 100%;
+        }
+        
+        .rocket-icon {
+            display: inline-block;
+            margin-right: 8px;
+            animation: rocketBounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        @keyframes rocketBounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0) rotate(0deg);
+            }
+            40% {
+                transform: translateY(-5px) rotate(-10deg);
+            }
+            60% {
+                transform: translateY(-3px) rotate(5deg);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(84, 160, 255, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(84, 160, 255, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(84, 160, 255, 0); }
+        }
+        
+        .animated-button:hover {
+            animation: gradientShift 1s ease infinite, pulse 1.5s infinite;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # Apply CSS styling to Streamlit button
+        st.markdown("""
+        <style>
+        /* Target the specific button */
+        .stButton > button {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff9ff3, #54a0ff) !important;
+            background-size: 400% 400% !important;
+            border: none !important;
+            border-radius: 50px !important;
+            color: white !important;
+            padding: 15px 30px !important;
+            font-size: 18px !important;
+            font-weight: bold !important;
+            cursor: pointer !important;
+            position: relative !important;
+            overflow: hidden !important;
+            transition: all 0.3s ease !important;
+            animation: gradientShift 3s ease infinite !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2) !important;
+            width: 100% !important;
+            margin: 10px 0 !important;
+        }
+        
+        .stButton > button:hover {
+            transform: translateY(-3px) scale(1.05) !important;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3) !important;
+            animation: gradientShift 1s ease infinite, pulse 1.5s infinite !important;
+        }
+        
+        .stButton > button:active {
+            transform: translateY(-1px) scale(1.02) !important;
+        }
+        
+        .stButton > button::before {
+            content: '' !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: -100% !important;
+            width: 100% !important;
+            height: 100% !important;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent) !important;
+            transition: left 0.6s !important;
+            z-index: 1 !important;
+        }
+        
+        .stButton > button:hover::before {
+            left: 100% !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        # IMPORTANT: This button navigates to dashboard with animations
+        if st.button("🚀 Go to Dashboard", type="primary", use_container_width=True, key="animated_dashboard_btn"):
             st.session_state.current_page = "Dashboard"
             st.rerun()
     
@@ -157,4 +277,3 @@ def show_home_page():
         <p>Last updated: """ + datetime.now().strftime("%Y-%m-%d %H:%M:%S") + """</p>
     </div>
     """, unsafe_allow_html=True)
-

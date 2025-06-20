@@ -7,7 +7,13 @@ import os
 from typing import Optional
 from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 
-crop_name = [('Coffee', 'coffee'), ('Black Pepper', 'black pepper'), ('Durian', 'durian')]
+# Crop data
+crop_name = [
+    ('Coffee', 'coffee', 'assets/coffee.png'),
+    ('Black Pepper', 'black pepper', 'assets/black_pepper.png'),
+    ('Durian', 'durian', 'assets/durian.png')
+]
+
 nutrients = ['N', 'P', 'K']
 env_features = ['Temperature', 'pH', 'Moisture (%)']
 
@@ -59,8 +65,15 @@ def build_next_exog(df_env: pd.DataFrame, exog_names: list) -> pd.DataFrame:
     exog_df = pd.DataFrame([exog_dict])
     return exog_df
 
+def get_crop_image(crop_key):
+    crop_images = {
+        'coffee': 'assets/coffee.png',
+        'black pepper': 'assets/black_pepper.png',
+        'durian': 'assets/durian.png'
+    }
+    return crop_images.get(crop_key, None)
+
 def show_dashboard():
-    # Custom CSS for better styling
     st.markdown("""
     <style>
     .main-header {
@@ -71,37 +84,6 @@ def show_dashboard():
         color: white;
         text-align: center;
     }
-    
-    .crop-button {
-        background: linear-gradient(45deg, #4CAF50, #45a049);
-        color: white;
-        border: none;
-        padding: 15px 25px;
-        border-radius: 8px;
-        margin: 5px;
-        cursor: pointer;
-        font-size: 16px;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    }
-    
-    .crop-button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    .home-button {
-        background: linear-gradient(45deg, #FF6B6B, #FF5252);
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        border-radius: 25px;
-        font-weight: bold;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
-    }
-    
     .section-header {
         background: linear-gradient(90deg, #f8f9fa, #e9ecef);
         padding: 1rem;
@@ -109,7 +91,6 @@ def show_dashboard():
         border-left: 5px solid #28a745;
         margin: 1rem 0;
     }
-    
     .info-card {
         background: white;
         padding: 1.5rem;
@@ -118,9 +99,8 @@ def show_dashboard():
         border: 1px solid #e9ecef;
         margin: 1rem 0;
     }
-    
     .metric-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #28a745 0%, #218838 100%);
         color: white;
         padding: 1rem;
         border-radius: 8px;
@@ -130,21 +110,17 @@ def show_dashboard():
     </style>
     """, unsafe_allow_html=True)
 
-    # Initialize selected_crop if not exists
     if 'selected_crop' not in st.session_state:
         st.session_state['selected_crop'] = None
 
     crop_key = st.session_state.get('selected_crop')
 
-    # If no crop is selected, show crop selection page
     if not crop_key:
         show_crop_selection()
     else:
         show_crop_dashboard(crop_key)
 
 def show_crop_selection():
-    """Show the crop selection page"""
-    # Header with navigation
     col1, col2 = st.columns([1, 4])
     
     with col1:
@@ -161,7 +137,6 @@ def show_crop_selection():
         </div>
         """, unsafe_allow_html=True)
 
-    # Crop Selection Section
     st.markdown("""
     <div class="section-header">
         <h3>🌾 Select Your Crop</h3>
@@ -170,9 +145,10 @@ def show_crop_selection():
     """, unsafe_allow_html=True)
     
     cols = st.columns(len(crop_name))
-    for i, (label, key) in enumerate(crop_name):
+    for i, (label, key, image_path) in enumerate(crop_name):
         with cols[i]:
-            if st.button(f"🌿 {label}", key=f"crop_{key}", use_container_width=True):
+            st.image(image_path, width=80)
+            if st.button(label, key=f"crop_{key}", use_container_width=True):
                 st.session_state['selected_crop'] = key
                 st.rerun()
 
@@ -191,34 +167,27 @@ def show_crop_selection():
     """, unsafe_allow_html=True)
 
 def show_crop_dashboard(crop_key):
-    """Show the actual dashboard with graphs for selected crop"""
-    # Header with navigation - different buttons for dashboard view
-    col1, col2= st.columns([1, 3])
-    
-    # with col1:
-    #     if st.button("🏠 Home", key="home_btn_dashboard"):
-    #         st.session_state.page = "home"
-    #         st.session_state.selected_crop = None
-    #         st.rerun()
+    col1, col2 = st.columns([1, 3])
     
     with col1:
         if st.button("🔙 Change Crop", key="back_to_selection"):
             st.session_state.selected_crop = None
             st.rerun()
     
+    crop_image = get_crop_image(crop_key)
+    
     with col2:
+        st.markdown(f"""<div class="main-header">""", unsafe_allow_html=True)
+        if crop_image:
+            st.image(crop_image, width=60)
         st.markdown(f"""
-        <div class="main-header">
-            <h1>📊 {crop_key.capitalize()} Dashboard</h1>
+            <h1>{crop_key.capitalize()} Dashboard</h1>
             <p>Real-time data and predictions for your {crop_key} crop</p>
         </div>
         """, unsafe_allow_html=True)
 
-    # Load dataset
     try:
         df = load_crop_data(crop_key)
-        
-        # Display summary metrics
         latest_data = df.iloc[-1]
         col1, col2, col3, col4 = st.columns(4)
         
@@ -258,29 +227,23 @@ def show_crop_dashboard(crop_key):
         st.error(f"❌ Error loading data for {crop_key}: {e}")
         return
 
-    # Filter last 24 hours for environment plots
     df_env = df[df['Timestamp'] >= df['Timestamp'].max() - timedelta(days=1)]
 
-    # Environmental graphs (last 24 hours) - UNCHANGED
     st.markdown("""
     <div class="section-header">
         <h3>🌤 Environmental Conditions (Last 24 Hours)</h3>
         <p>Monitor key environmental factors affecting crop growth</p>
     </div>
     """, unsafe_allow_html=True)
-    
+
     env_cols = st.columns(3)
     for i, feature in enumerate(env_features):
         with env_cols[i]:
             fig = go.Figure()
             fig.add_trace(go.Scatter(x=df_env['Timestamp'], y=df_env[feature], mode='lines', name=feature))
-            fig.update_layout(
-                title=f'{feature.replace("_", " ").capitalize()} (Last 24 Hours)',
-                xaxis_title='Time', yaxis_title=feature.capitalize()
-            )
+            fig.update_layout(title=f'{feature} (Last 24 Hours)', xaxis_title='Time', yaxis_title=feature)
             st.plotly_chart(fig, use_container_width=True)
 
-    # Nutrient forecasting - last 1 day history + next 3 hours - UNCHANGED
     st.markdown("""
     <div class="section-header">
         <h3>🧪 Nutrient Forecast (Last 24h + Next 3 Hours)</h3>
@@ -289,7 +252,7 @@ def show_crop_dashboard(crop_key):
     """, unsafe_allow_html=True)
 
     nutrient_cols = st.columns(3)
-    forecast_horizon = 3  # 3 hours ahead
+    forecast_horizon = 3
     df_nutrient = df[df['Timestamp'] >= df['Timestamp'].max() - timedelta(days=1)]
 
     for i, nutrient in enumerate(nutrients):
@@ -301,53 +264,43 @@ def show_crop_dashboard(crop_key):
 
             try:
                 model_exog_names = getattr(model.model, "exog_names", [])
-                forecast_vals = []
-                future_times = []
-
+                forecast_vals, future_times = [], []
                 temp_df_env = df_env.copy()
 
                 for step in range(1, forecast_horizon + 1):
                     exog = build_next_exog(temp_df_env, model_exog_names) if model_exog_names else None
                     forecast = model.forecast(steps=1, exog=exog) if exog is not None else model.forecast(steps=1)
-                    forecast_val = forecast.iloc[0] if hasattr(forecast, "iloc") else forecast[0]
-                    forecast_vals.append(forecast_val)
-                    future_time = df_nutrient["Timestamp"].iloc[-1] + timedelta(hours=step)
-                    future_times.append(future_time)
+                    val = forecast.iloc[0] if hasattr(forecast, "iloc") else forecast[0]
+                    forecast_vals.append(val)
+                    future_times.append(df_nutrient["Timestamp"].iloc[-1] + timedelta(hours=step))
 
-                    # Simulate next row for exog input
                     next_row = temp_df_env.iloc[-1:].copy()
-                    next_row["Timestamp"] = future_time
+                    next_row["Timestamp"] = future_times[-1]
                     for feat in env_features:
-                        if feat in next_row.columns:
-                            next_row[feat] = next_row[feat].values[0]
+                        next_row[feat] = next_row[feat].values[0]
                     temp_df_env = pd.concat([temp_df_env, next_row], ignore_index=True)
 
-                # Plot nutrient + forecast
                 fig = go.Figure()
-                fig.add_trace(go.Scatter(x=df_nutrient["Timestamp"], y=df_nutrient[nutrient],
-                                        mode="lines", name="Historical"))
-                fig.add_trace(go.Scatter(x=future_times, y=forecast_vals,
-                                        mode="lines+markers", name="Forecast (3h)",
-                                        line=dict(color="red", dash="dash")))
+                fig.add_trace(go.Scatter(x=df_nutrient["Timestamp"], y=df_nutrient[nutrient], mode="lines", name="Historical"))
+                fig.add_trace(go.Scatter(x=future_times, y=forecast_vals, mode="lines+markers", name="Forecast", line=dict(color="red", dash="dash")))
 
                 threshold = thresholds[crop_key][nutrient]
-                fig.add_trace(go.Scatter(x=df_nutrient["Timestamp"], y=[threshold]*len(df_nutrient),
-                                        mode="lines", name="Threshold",
-                                        line=dict(color="orange", dash="dot")))
+                fig.add_trace(go.Scatter(x=df_nutrient["Timestamp"], y=[threshold]*len(df_nutrient), mode="lines", name="Threshold", line=dict(color="orange", dash="dot")))
 
-                fig.update_layout(title=f"{nutrient}", xaxis_title="Time", yaxis_title=nutrient)
+                fig.update_layout(title=nutrient, xaxis_title="Time", yaxis_title=nutrient)
                 st.plotly_chart(fig, use_container_width=True)
 
-                # Alert if any forecast value is below threshold
                 if any(val < threshold for val in forecast_vals):
                     st.warning(f"⚠️ {nutrient} levels may drop below threshold in the next 3 hours!")
 
             except Exception as e:
                 st.error(f"❌ Forecast error for {nutrient}: {e}")
 
-    # Footer
     st.markdown("""
     <div style="text-align: center; padding: 2rem; color: #666; border-top: 1px solid #eee; margin-top: 2rem;">
         <p>🌱 Crop Nutrient Monitoring System | Real-time Agricultural Intelligence</p>
     </div>
     """, unsafe_allow_html=True)
+
+# Run the app
+show_dashboard()
