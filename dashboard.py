@@ -10,7 +10,7 @@ from statsmodels.tsa.statespace.sarimax import SARIMAXResultsWrapper
 # Crop data
 crop_name = [
     ('Coffee', 'coffee', 'assets/coffee.png'),
-    ('Black Pepper', 'black pepper', 'assets/black_pepper.png'),
+    ('BlackPepper', 'blackpepper', 'assets/black_pepper.png'),
     ('Durian', 'durian', 'assets/durian.png')
 ]
 
@@ -20,7 +20,7 @@ env_features = ['Temperature', 'pH', 'Moisture (%)']
 thresholds = {
     'coffee': {'N': 200, 'P': 190, 'K': 180},
     'durian': {'N': 255, 'P': 218, 'K': 155},
-    'black pepper': {'N': 150, 'P': 190, 'K': 140},
+    'blackpepper': {'N': 150, 'P': 190, 'K': 140},
 }
 
 @st.cache_data
@@ -68,7 +68,7 @@ def build_next_exog(df_env: pd.DataFrame, exog_names: list) -> pd.DataFrame:
 def get_crop_image(crop_key):
     crop_images = {
         'coffee': 'assets/coffee.png',
-        'black pepper': 'assets/black_pepper.png',
+        'blackpepper': 'assets/black_pepper.png',
         'durian': 'assets/durian.png'
     }
     return crop_images.get(crop_key, None)
