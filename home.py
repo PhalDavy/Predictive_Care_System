@@ -37,8 +37,8 @@ def show_home_page():
     with col1:
         st.markdown("""
         <div style="background: white; padding: 15px; border-radius: 10px; 
-                    border-left: 5px solid #FF6B6B; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: auto;width:350px">
-            <h4 style="color: #FF6B6B; margin-bottom: 15px;">📊 Real-time Monitoring</h4>
+                    border-left: 5px solid #4ECDC4; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: auto;width:350px">
+            <h4 style="color: #4ECDC4; margin-bottom: 15px;">📊 Real-time Monitoring</h4>
             <ul style="line-height: 1.8;">
                 <li>Temperature tracking</li>
                 <li>Soil moisture levels</li>
@@ -54,7 +54,7 @@ def show_home_page():
                     border-left: 5px solid #4ECDC4; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: auto; width:350px">
             <h4 style="color: #4ECDC4; margin-bottom: 15px;">🔮 Predictive Analytics</h4>
             <ul style="line-height: 1.8;">
-                <li>SARIMA forecasting models</li>
+                <li>Prophet forecasting models</li>
                 <li>Nutrient prediction (N, P, K)</li>
                 <li>3-hour ahead forecasts</li>
                 <li>Threshold alerts</li>
@@ -65,8 +65,8 @@ def show_home_page():
     with col3:
         st.markdown("""
         <div style="background: white; padding: 15px; border-radius: 10px; 
-                    border-left: 5px solid #45B7D1; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: auto; width:350px">
-            <h4 style="color: #45B7D1; margin-bottom: 15px;">🌾 Multi-Crop Support</h4>
+                    border-left: 5px solid #4ECDC4; box-shadow: 0 2px 10px rgba(0,0,0,0.1); height: auto; width:350px">
+            <h4 style="color: #4ECDC4; margin-bottom: 15px;">🌾 Multi-Crop Support</h4>
             <ul style="line-height: 1.8;">
                 <li>Crop-specific analysis</li>
                 <li>Customized thresholds</li>
@@ -99,7 +99,7 @@ def show_home_page():
     with col2:
         st.markdown("""
         <div style="text-align: center; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            <div style="background: linear-gradient(135deg,  #2E8B57); 
                         color: white; padding: 30px; border-radius: 15px;">
                 <h4 style="margin-bottom: 15px;">Ready to Start?</h4>
                 <p style="margin-bottom: 20px;">Explore your crop data and predictions</p>

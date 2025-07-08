@@ -18,9 +18,9 @@ nutrients = ['N', 'P', 'K']
 env_features = ['Temperature', 'pH', 'Moisture (%)']
 
 thresholds = {
-    'coffee': {'N': 200, 'P': 190, 'K': 180},
-    'durian': {'N': 255, 'P': 218, 'K': 155},
-    'blackpepper': {'N': 150, 'P': 190, 'K': 140},
+    'coffee': {'N': 35, 'P': 50, 'K': 45},
+    'durian': {'N': 55, 'P': 28, 'K': 45},
+    'blackpepper': {'N': 33, 'P': 51, 'K': 39},
 }
 
 @st.cache_data
@@ -252,7 +252,7 @@ def show_crop_dashboard(crop_key):
     """, unsafe_allow_html=True)
 
     nutrient_cols = st.columns(3)
-    forecast_horizon = 3
+    forecast_horizon = 12  # 12 steps of 15 minutes = 3 hours
     df_nutrient = df[df['Timestamp'] >= df['Timestamp'].max() - timedelta(days=1)]
 
     for i, nutrient in enumerate(nutrients):
@@ -264,25 +264,30 @@ def show_crop_dashboard(crop_key):
 
             try:
                 model_exog_names = getattr(model.model, "exog_names", [])
-                forecast_vals, future_times = [], []
                 temp_df_env = df_env.copy()
+
+                last_val = df[nutrient].iloc[-1]
+                last_time = df["Timestamp"].iloc[-1]
+                forecast_vals = [last_val]
+                future_times = [last_time]
 
                 for step in range(1, forecast_horizon + 1):
                     exog = build_next_exog(temp_df_env, model_exog_names) if model_exog_names else None
                     forecast = model.forecast(steps=1, exog=exog) if exog is not None else model.forecast(steps=1)
                     val = forecast.iloc[0] if hasattr(forecast, "iloc") else forecast[0]
                     forecast_vals.append(val)
-                    future_times.append(df_nutrient["Timestamp"].iloc[-1] + timedelta(hours=step))
+                    next_time = last_time + timedelta(minutes=step * 15)
+                    future_times.append(next_time)
 
                     next_row = temp_df_env.iloc[-1:].copy()
-                    next_row["Timestamp"] = future_times[-1]
+                    next_row["Timestamp"] = next_time
                     for feat in env_features:
                         next_row[feat] = next_row[feat].values[0]
                     temp_df_env = pd.concat([temp_df_env, next_row], ignore_index=True)
 
                 fig = go.Figure()
                 fig.add_trace(go.Scatter(x=df_nutrient["Timestamp"], y=df_nutrient[nutrient], mode="lines", name="Historical"))
-                fig.add_trace(go.Scatter(x=future_times, y=forecast_vals, mode="lines+markers", name="Forecast", line=dict(color="red", dash="dash")))
+                fig.add_trace(go.Scatter(x=future_times, y=forecast_vals, mode="lines", name="Forecast", line=dict(color="red")))
 
                 threshold = thresholds[crop_key][nutrient]
                 fig.add_trace(go.Scatter(x=df_nutrient["Timestamp"], y=[threshold]*len(df_nutrient), mode="lines", name="Threshold", line=dict(color="orange", dash="dot")))
@@ -290,8 +295,10 @@ def show_crop_dashboard(crop_key):
                 fig.update_layout(title=nutrient, xaxis_title="Time", yaxis_title=nutrient)
                 st.plotly_chart(fig, use_container_width=True)
 
-                if any(val < threshold for val in forecast_vals):
-                    st.warning(f"⚠️ {nutrient} levels may drop below threshold in the next 3 hours!")
+                if any(val < threshold for val in forecast_vals[1:]):
+                    st.warning(f"⚠️ {nutrient} levels may drop below threshold in the next 3 hours (12 steps)!")
+                else:
+                    st.success(f"✅ {nutrient} levels are normal - staying above threshold for next 3 hours")
 
             except Exception as e:
                 st.error(f"❌ Forecast error for {nutrient}: {e}")
